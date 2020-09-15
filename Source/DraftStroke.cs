@@ -14,7 +14,7 @@ namespace EvilSpirit
         Camera _camera;
         Camera Camera => _camera != null ? _camera : (_camera = Camera.main);
 
-        struct Line
+        public struct Line
         {
             public Vector3 a;
             public Vector3 b;
@@ -311,5 +311,9 @@ namespace EvilSpirit
                 l.Value.Clear();
             }
         }
+
+		public IEnumerable<(StrokeStyle, List<Line>)> GetStyledLines() {
+			return lines.Select(e => (e.Key, e.Value.lines));
+		}
     }
 }
