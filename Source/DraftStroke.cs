@@ -282,6 +282,11 @@ namespace EvilSpirit
             currentLines = lines[currentStyle];
         }
 
+		public StrokeStyle GetCurrentStyle()
+		{
+			return currentStyle;
+		}
+
         public void DrawLine(Vector3 a, Vector3 b)
         {
             currentLines.AddLine(a, b);
