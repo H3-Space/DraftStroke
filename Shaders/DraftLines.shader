@@ -31,7 +31,9 @@
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile_instancing
-			
+			#pragma multi_compile __ CLIP_BOX CLIP_CORNER
+			#pragma multi_compile __ USE_WST_CROSSSECTION
+
 			#include "UnityCG.cginc"
 
 			struct appdata {
@@ -48,6 +50,9 @@
 				float3 cap: TEXCOORD1;
 
 				float4 vertex : SV_POSITION;
+				#if defined(USE_WST_CROSSSECTION)
+					float4 pos : TEXCOORD2;
+				#endif
 			};
 
 			sampler2D _MainTex;
@@ -59,6 +64,10 @@
 			float4 _CamDir;
 			float4 _CamRight;
 			fixed4 _Color;
+
+			#if defined(USE_WST_CROSSSECTION)
+				#include "../../Assets/WorldSpaceTransitions/crossSection (Built In)/shaders/CGIncludes/section_clipping_CS.cginc"
+			#endif
 
 			v2f vert (appdata v) {
 				const float feather = 0.7;
@@ -83,6 +92,9 @@
 				float3 y = cross(tang, float3(0.0, 0.0, 1.0)) * cap;
 
 				o.vertex = projected + float4(v.params.x * x + v.params.y * y, 0.0);
+				#if defined(USE_WST_CROSSSECTION)
+					o.pos = mul(unity_ObjectToWorld, v.vertex);
+				#endif
 				
 				// some depth offset depending on width of line
 				o.vertex.z += _Width / 4.0 / _ScreenParams.y;
@@ -99,6 +111,9 @@
 			}
 
 			fixed4 frag (v2f i) : SV_Target {
+				#if defined(USE_WST_CROSSSECTION)
+					PLANE_CLIP(i.pos)
+				#endif
 				const float feather = 0.7;
 				float patternScale = _PatternLength * _StippleWidth * _Pixel;
 				fixed4 v = tex2D(_MainTex, float2(i.uv.x / patternScale, 0.0));
