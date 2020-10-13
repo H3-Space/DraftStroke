@@ -79,7 +79,7 @@ namespace EvilSpirit
             var go = new GameObject(lines.style.name);
             go.transform.SetParent(parent != null ? parent.transform : gameObject.transform, false);
             var mr = go.AddComponent<MeshRenderer>();
-            mr.sharedMaterial = new Material(ss.depthTest ? Shader.Find("NoteCAD/DraftLines") : Shader.Find("NoteCAD/DraftLinesDepthOff"));
+            mr.sharedMaterial = new Material(Shader.Find("NoteCAD/DraftLines"));
             lines.material = mr.sharedMaterial;
             var mf = go.AddComponent<MeshFilter>();
             var mesh = new Mesh();
@@ -257,6 +257,14 @@ namespace EvilSpirit
                     material.SetFloat("_StippleWidth", (float)(style.dashesScale(pixel)));
                     material.SetFloat("_PatternLength", style.GetPatternLength());
                     material.SetColor("_Color", style.color);
+
+					material.SetFloat(
+						"_ZTest", 
+						(float)(style.depthTest ? 
+							UnityEngine.Rendering.CompareFunction.LessEqual : 
+							UnityEngine.Rendering.CompareFunction.Always)
+					);
+
                     material.SetTexture("_MainTex", DashAtlas.GetAtlas(style.dashes));
                     material.renderQueue = style.queue;
                 }

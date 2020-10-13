@@ -12,6 +12,7 @@
 		_CamDir("CamDir", Vector) = (1,1,1,0)
 		_CamRight("CamRight", Vector) = (1,0,1,0)
 		_Color("Color", Color) = (1,1,1,1)
+		_ZTest ("_ZTest", Float) = 4.0
 	}
 	
 	SubShader {
@@ -19,6 +20,7 @@
 		LOD 100
 		//AlphaToMask On
 		//ZWrite Off
+		ZTest [_ZTest]
 		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass {
