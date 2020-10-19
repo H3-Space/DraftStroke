@@ -61,6 +61,7 @@
 			float _StippleWidth;
 			float _PatternLength;
 			float _Pixel;
+			float _DpiScale;
 			float4 _CamDir;
 			float4 _CamRight;
 			fixed4 _Color;
@@ -80,7 +81,7 @@
 				tang = tang / length(tang.xy);
 				tang.x *= _ScreenParams.x / _ScreenParams.y;
 				float scale = length(float3(unity_ObjectToWorld[0].x, unity_ObjectToWorld[1].x, unity_ObjectToWorld[2].x));
-				float pixel = projected.w / _ScreenParams.x;
+				float pixel = _DpiScale * projected.w / _ScreenParams.x;
 				float pix = pixel / 2.0;
 				// dir does not get used
 				//float3 dir = mul((float3x3)unity_WorldToObject, (float3)_CamDir);

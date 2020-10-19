@@ -14,6 +14,21 @@ namespace EvilSpirit
         Camera _camera;
         Camera Camera => _camera != null ? _camera : (_camera = Camera.main);
 
+		static bool _initialized = false;
+		static float _dpiScale = 1f;
+		public static float DpiScale
+		{
+			get
+			{
+				return _dpiScale;
+			}
+			set
+			{
+				_dpiScale = value;
+				Shader.SetGlobalFloat("_DpiScale", _dpiScale);
+			}
+		}
+		
         public struct Line
         {
             public Vector3 a;
@@ -327,6 +342,15 @@ namespace EvilSpirit
 
 		public IEnumerable<(StrokeStyle, List<Line>)> GetStyledLines() {
 			return lines.Select(e => (e.Key, e.Value.lines));
+		}
+		
+		void Awake()
+		{
+			if(!_initialized)
+			{
+				_initialized = true;
+				DpiScale = 1.0f;
+			}
 		}
     }
 }
