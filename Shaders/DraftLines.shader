@@ -82,13 +82,13 @@
 				tang.x *= _ScreenParams.x / _ScreenParams.y;
 				float scale = length(float3(unity_ObjectToWorld[0].x, unity_ObjectToWorld[1].x, unity_ObjectToWorld[2].x));
 				float pixel = _DpiScale * projected.w / _ScreenParams.x;
-				float pix = pixel / 2.0;
+				float pix = pixel/* / 2.0*/;
 				// dir does not get used
 				//float3 dir = mul((float3x3)unity_WorldToObject, (float3)_CamDir);
 				if (all(v.tangent.xyz == float3(0, 0, 0))) {
 					tang = normalize(mul((float3x3)unity_WorldToObject, (float3)_CamRight));
 				}
-				float cap = _Width * pix + feather * pixel;
+				float cap = _Width * pix + feather * 2.0 * pixel;
 				float3 x = float3(0.0, 0.0, 0.0);//tang * cap / 2.0;
 				float3 y = cross(tang, float3(0.0, 0.0, 1.0)) * cap;
 
