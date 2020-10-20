@@ -98,7 +98,7 @@
 				#endif
 				
 				// some depth offset depending on width of line
-				o.vertex.z += _Width / 4.0 / _ScreenParams.y;
+				o.vertex.z += _DpiScale * _Width / 4.0 / _ScreenParams.x;
 				float2 uv = v.uv;
 				uv.x += v.params.x * cap;
 				float len = length(v.tangent.xyz) * scale;
