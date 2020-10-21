@@ -44,6 +44,20 @@ namespace EvilSpirit
 		public Color color = Color.white;
 		public float[] dashes = new float[0];
 
+		public StrokeStyle() {}
+		public StrokeStyle(StrokeStyle style)
+		{
+			name = style.name;
+			width = style.width;
+			//stippleWidth = style.stippleWidth;
+			depthTest = style.depthTest;
+			inPixels = style.inPixels;
+			dashesInPixels = style.dashesInPixels;
+			queue = style.queue;
+			color = style.color;
+			dashes = style.dashes;
+		}
+
 		public StrokeStyle WithWidthAndStippleFrom(StrokeStyle takeWidthAndStipple)
 		{
 			return new StrokeStyle
@@ -158,5 +172,9 @@ namespace EvilSpirit
 	public class StrokeStyles : ScriptableObject
 	{
 		public StrokeStyle[] styles = new StrokeStyle[0];
+		public StrokeStyle Get(string name)
+		{
+			return styles.First(s => s.name == name);
+		}
 	}
 }
