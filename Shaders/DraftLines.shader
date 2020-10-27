@@ -46,8 +46,8 @@
 
 			struct v2f
 			{
-				float2 uv : TEXCOORD0;
-				float3 cap: TEXCOORD1;
+				noperspective float2 uv : TEXCOORD0;
+				noperspective float3 cap: TEXCOORD1;
 
 				float4 vertex : SV_POSITION;
 				#if defined(USE_WST_CROSSSECTION)
@@ -78,7 +78,8 @@
 				float4 projectedTang = UnityObjectToClipPos(float4(v.vertex.xyz + normalize(v.tangent.xyz), 1.0));
 				float3 tang = projectedTang.xyz / projectedTang.w - projected.xyz / projected.w;
 				if((projected.w >= 0) != (projectedTang.w >= 0)) tang = -tang;
-				tang = tang / length(tang.xy);
+				float tangLen = length(tang.xy);
+				tang = tang / tangLen;
 				tang.x *= _ScreenParams.x / _ScreenParams.y;
 				float scale = length(float3(unity_ObjectToWorld[0].x, unity_ObjectToWorld[1].x, unity_ObjectToWorld[2].x));
 				float pixel = _DpiScale * projected.w / _ScreenParams.x;
@@ -101,7 +102,7 @@
 				o.vertex.z += _DpiScale * _Width / 4.0 / _ScreenParams.x;
 				float2 uv = v.uv;
 				uv.x += v.params.x * cap;
-				float len = length(v.tangent.xyz) * scale;
+				float len = tangLen;
 				if(v.params.x == -1.0) {
 					o.cap = float3(-1.0, len / cap, pixel);
 				} else {
