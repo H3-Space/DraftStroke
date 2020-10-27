@@ -29,6 +29,20 @@ namespace EvilSpirit
 			}
 		}
 		
+		static float _feather = 0.7f;
+		public static float Feather
+		{
+			get
+			{
+				return _feather;
+			}
+			set
+			{
+				_feather = value;
+				Shader.SetGlobalFloat("_Feather", _feather);
+			}
+		}
+
         public struct Line
         {
             public Vector3 a;
@@ -350,6 +364,7 @@ namespace EvilSpirit
 			{
 				_initialized = true;
 				DpiScale = 1.0f;
+				Feather = 0.7f;
 			}
 		}
     }

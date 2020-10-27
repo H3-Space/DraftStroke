@@ -64,14 +64,14 @@
 			float _DpiScale;
 			float4 _CamDir;
 			float4 _CamRight;
+			float _Feather;
 			fixed4 _Color;
 
 			#if defined(USE_WST_CROSSSECTION)
-				#include "../../Assets/WorldSpaceTransitions/crossSection (Built In)/shaders/CGIncludes/section_clipping_CS.cginc"
+				#include "../../Assets/WorldSpaceTransitions/crossSection (HDRP)/StencilShaders/section_clipping_CS.hlsl"
 			#endif
 
 			v2f vert (appdata v) {
-				const float feather = 0.7;
 				v2f o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				float4 projected = UnityObjectToClipPos(float4(v.vertex.xyz, 1.0));
@@ -88,7 +88,7 @@
 				if (all(v.tangent.xyz == float3(0, 0, 0))) {
 					tang = normalize(mul((float3x3)unity_WorldToObject, (float3)_CamRight));
 				}
-				float cap = _Width * pix + feather * 2.0 * pixel;
+				float cap = _Width * pix + _Feather * 2.0 * pixel;
 				float3 x = float3(0.0, 0.0, 0.0);//tang * cap / 2.0;
 				float3 y = cross(tang, float3(0.0, 0.0, 1.0)) * cap;
 
@@ -115,17 +115,16 @@
 				#if defined(USE_WST_CROSSSECTION)
 					PLANE_CLIP(i.pos)
 				#endif
-				const float feather = 0.7;
 				float patternScale = _PatternLength * _StippleWidth * _Pixel;
 				fixed4 v = tex2D(_MainTex, float2(i.uv.x / patternScale, 0.0));
 				float val = dot(v, float4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 160581375.0));
 				float pix = i.cap.z / 2.0;
 				float pat = val * patternScale / (_Width * pix);
-				float c = (_Width / 2.0 + feather) / (_Width / 2.0);
+				float c = (_Width / 2.0 + _Feather) / (_Width / 2.0);
 				float cap = (max(i.cap.x - i.cap.y, 0.0) - min(i.cap.x, 0.0)) * c;
 				float dist = abs(i.uv.y * c);//length(float2(max(cap, pat), i.uv.y * c));
 
-				float f = 2.0 * feather / (_Width / 2.0 + feather);
+				float f = 2.0 * _Feather / (_Width / 2.0 + _Feather);
 				float k = smoothstep(1.0 - f, 1.0+ f, dist);
 				if (k == 1.0) discard;
 				return float4(_Color.rgb, _Color.a * (1.0 - k));
