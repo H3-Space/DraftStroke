@@ -19,7 +19,7 @@
 		Tags { "RenderType" = "Transparent" }
 		LOD 100
 		//AlphaToMask On
-		//ZWrite Off
+		ZWrite Off
 		ZTest [_ZTest]
 		Blend SrcAlpha OneMinusSrcAlpha
 
@@ -90,7 +90,7 @@
 					tang = normalize(mul((float3x3)unity_WorldToObject, (float3)_CamRight));
 				}
 				float cap = _Width * pix + _Feather * 2.0 * pixel;
-				float3 x = float3(0.0, 0.0, 0.0);//tang * cap / 2.0;
+				float3 x = tang * cap / 2.0;
 				float3 y = cross(tang, float3(0.0, 0.0, 1.0)) * cap;
 
 				o.vertex = projected + float4(v.params.x * x + v.params.y * y, 0.0);
@@ -102,7 +102,7 @@
 				o.vertex.z += _DpiScale * _Width / 4.0 / _ScreenParams.x;
 				float2 uv = v.uv;
 				uv.x += v.params.x * cap;
-				float len = tangLen;
+				float len = length(v.tangent.xyz);
 				if(v.params.x == -1.0) {
 					o.cap = float3(-1.0, len / cap, pixel);
 				} else {
@@ -123,7 +123,7 @@
 				float pat = val * patternScale / (_Width * pix);
 				float c = (_Width / 2.0 + _Feather) / (_Width / 2.0);
 				float cap = (max(i.cap.x - i.cap.y, 0.0) - min(i.cap.x, 0.0)) * c;
-				float dist = abs(i.uv.y * c);//length(float2(max(cap, pat), i.uv.y * c));
+				float dist = length(float2(max(cap, pat), i.uv.y * c));
 
 				float f = 2.0 * _Feather / (_Width / 2.0 + _Feather);
 				float k = smoothstep(1.0 - f, 1.0+ f, dist);
