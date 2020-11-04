@@ -33,12 +33,17 @@
 			#pragma multi_compile_instancing
 			#pragma multi_compile __ CLIP_BOX CLIP_CORNER
 			#pragma multi_compile __ USE_WST_CROSSSECTION
+			#pragma multi_compile __ USE_SILHOUETTE_NORMALS
 
 			#include "UnityCG.cginc"
 
 			struct appdata {
 				float4 vertex : POSITION;
 				float2 uv : TEXCOORD0;
+				#if defined(USE_SILHOUETTE_NORMALS)
+					float3 nl : TEXCOORD1;
+					float3 nr : TEXCOORD2;
+				#endif
 				float4 tangent: NORMAL;
 				float4 params: TANGENT;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -75,6 +80,25 @@
 				v2f o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				float4 projected = UnityObjectToClipPos(float4(v.vertex.xyz, 1.0));
+
+				#if defined(USE_SILHOUETTE_NORMALS)
+					if(any(v.nl != float3(0.0, 0.0, 0.0)))
+					{
+						float3 nl = UnityObjectToClipPos(float4(v.vertex.xyz + v.nl, 1.0)).xyz - projected.xyz;
+						float3 nr = UnityObjectToClipPos(float4(v.vertex.xyz + v.nr, 1.0)).xyz - projected.xyz;
+						float ldot = dot(nl, float3(0.0, 0.0, 1.0));
+						float rdot = dot(nr, float3(0.0, 0.0, 1.0));
+
+						bool isOutline = (ldot > -1e-6) == (rdot < 1e-6) ||
+										 (rdot > -1e-6) == (ldot < 1e-6);
+						if(!isOutline)
+						{
+							o.vertex = float4(0.0, 0.0, 0.0, 0.0);
+							return o;
+						}
+					}
+				#endif
+
 				float4 projectedTang = UnityObjectToClipPos(float4(v.vertex.xyz + normalize(v.tangent.xyz), 1.0));
 				float3 tang = projectedTang.xyz / projectedTang.w - projected.xyz / projected.w;
 				if((projected.w >= 0) != (projectedTang.w >= 0)) tang = -tang;

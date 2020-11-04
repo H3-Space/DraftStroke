@@ -43,10 +43,14 @@ namespace EvilSpirit
 			}
 		}
 
+		public bool UseSilhouetteNormals { get; set; } = false;
+
         public struct Line
         {
             public Vector3 a;
             public Vector3 b;
+			public Vector3 nl;
+			public Vector3 nr;
 
             public void Swap()
             {
@@ -72,6 +76,12 @@ namespace EvilSpirit
             public void AddLine(Vector3 a, Vector3 b)
             {
                 lines.Add(new Line { a = a, b = b });
+                dirty = true;
+            }
+
+            public void AddLine(Vector3 a, Vector3 b, Vector3 nl, Vector3 nr)
+            {
+                lines.Add(new Line { a = a, b = b, nl = nl, nr = nr });
                 dirty = true;
             }
 
@@ -134,6 +144,15 @@ namespace EvilSpirit
                 var tangents = new Vector4[curLinesCount * 4];
                 var normals = new Vector3[curLinesCount * 4];
                 var coords = new Vector2[curLinesCount * 4];
+                Vector3[] normalsLeft = null;
+				Vector3[] normalsRight = null;
+
+				if(UseSilhouetteNormals)
+				{
+					normalsLeft = new Vector3[curLinesCount * 4];
+					normalsRight = new Vector3[curLinesCount * 4];
+				}
+
                 var indices = new int[curLinesCount * 6];
                 int curV = 0;
 
@@ -174,12 +193,22 @@ namespace EvilSpirit
                     tangents[curV] = t0;
                     normals[curV] = t;
                     coords[curV] = new Vector2(phase, -1f);
+					if(UseSilhouetteNormals)
+					{
+						normalsLeft[curV] = l.nl;
+						normalsRight[curV] = l.nr;
+					}
                     curV++;
 
                     vertices[curV] = l.a;
                     tangents[curV] = t1;
                     normals[curV] = t;
                     coords[curV] = new Vector2(phase, 1f);
+					if(UseSilhouetteNormals)
+					{
+						normalsLeft[curV] = l.nl;
+						normalsRight[curV] = l.nr;
+					}
                     curV++;
 
                     phase += t.magnitude;
@@ -188,12 +217,22 @@ namespace EvilSpirit
                     tangents[curV] = t2;
                     normals[curV] = t;
                     coords[curV] = new Vector2(phase, -1f);
+					if(UseSilhouetteNormals)
+					{
+						normalsLeft[curV] = l.nl;
+						normalsRight[curV] = l.nr;
+					}
                     curV++;
 
                     vertices[curV] = l.b;
                     tangents[curV] = t3;
                     normals[curV] = t;
                     coords[curV] = new Vector2(phase, 1f);
+					if(UseSilhouetteNormals)
+					{
+						normalsLeft[curV] = l.nl;
+						normalsRight[curV] = l.nr;
+					}
                     curV++;
 
                     indices[i * 6 + 0] = i * 4 + 0;
@@ -215,6 +254,11 @@ namespace EvilSpirit
                 mesh.vertices = vertices;
                 mesh.tangents = tangents;
                 mesh.normals = normals;
+				if(UseSilhouetteNormals)
+				{
+					mesh.SetUVs(1, normalsLeft);
+					mesh.SetUVs(2, normalsRight);
+				}
                 mesh.uv = coords;
                 mesh.SetIndices(indices, MeshTopology.Triangles, 0, true);
                 //mesh.RecalculateBounds();
@@ -286,6 +330,15 @@ namespace EvilSpirit
                     material.SetFloat("_StippleWidth", (float)(style.dashesScale(pixel)));
                     material.SetFloat("_PatternLength", style.GetPatternLength());
                     material.SetColor("_Color", style.color);
+					
+					if(UseSilhouetteNormals)
+					{
+						material.EnableKeyword("USE_SILHOUETTE_NORMALS");
+					}
+					else
+					{
+						material.DisableKeyword("USE_SILHOUETTE_NORMALS");
+					}
 
 					material.SetFloat(
 						"_ZTest", 
@@ -327,6 +380,11 @@ namespace EvilSpirit
         public void DrawLine(Vector3 a, Vector3 b)
         {
             currentLines.AddLine(a, b);
+        }
+
+        public void DrawLine(Vector3 a, Vector3 b, Vector3 nl, Vector3 nr)
+        {
+            currentLines.AddLine(a, b, nl, nr);
         }
 
         // As mentioned above, view dependent parameters don't seem necessary
