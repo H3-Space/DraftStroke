@@ -84,10 +84,14 @@
 				#if defined(USE_SILHOUETTE_NORMALS)
 					if(any(v.nl != float3(0.0, 0.0, 0.0)))
 					{
-						float3 nl = UnityObjectToClipPos(float4(v.vertex.xyz + v.nl, 1.0)).xyz - projected.xyz;
-						float3 nr = UnityObjectToClipPos(float4(v.vertex.xyz + v.nr, 1.0)).xyz - projected.xyz;
-						float ldot = dot(nl, float3(0.0, 0.0, 1.0));
-						float rdot = dot(nr, float3(0.0, 0.0, 1.0));
+						float3 viewDir = unity_OrthoParams.w == 1.0 
+							? normalize(mul((float3x3)unity_CameraToWorld, float3(0,0,1)))
+							: WorldSpaceViewDir(v.vertex);
+						float3 nl = mul((float3x3)unity_WorldToObject, v.nl);
+						float3 nr = mul((float3x3)unity_WorldToObject, v.nr); 
+
+						float ldot = dot(nl, viewDir);
+						float rdot = dot(nr, viewDir);
 
 						bool isOutline = (ldot > -1e-6) == (rdot < 1e-6) ||
 										 (rdot > -1e-6) == (ldot < 1e-6);
