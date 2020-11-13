@@ -145,11 +145,11 @@
 				#if defined(USE_WST_CROSSSECTION)
 					PLANE_CLIP(i.pos)
 				#endif
-				float patternScale = _PatternLength * _StippleWidth * _Pixel;
+				float pix = i.cap.z / 2.0;
+				float patternScale = _PatternLength * _StippleWidth * pix;
 				fixed4 v = tex2D(_MainTex, float2(i.uv.x / patternScale, 0.0));
 				float val = dot(v, float4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 160581375.0));
-				float pix = i.cap.z / 2.0;
-				float pat = val * patternScale / (_Width * pix);
+				float pat = val * patternScale / (_Width * pix) * 8.0;
 				float c = (_Width / 2.0 + _Feather) / (_Width / 2.0);
 				float cap = (max(i.cap.x - i.cap.y, 0.0) - min(i.cap.x, 0.0)) * c;
 				float dist = length(float2(max(cap, pat), i.uv.y * c));

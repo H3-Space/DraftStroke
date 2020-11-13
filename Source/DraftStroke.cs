@@ -323,7 +323,7 @@ namespace EvilSpirit
                     // .sharedMaterial and guarantees you're not leaking materials
 
                     var material = m.GetComponent<MeshRenderer>().sharedMaterial;
-                    material.SetFloat("_Pixel", (float)pixel);
+                    material.SetFloat("_Pixel", (float)1.0);
                     //material.SetVector("_CamDir", dir);
                     //material.SetVector("_CamRight", right);
                     material.SetFloat("_Width", (float)(style.width * style.scale(pixel)));
