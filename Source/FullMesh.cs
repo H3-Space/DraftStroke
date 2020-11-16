@@ -415,19 +415,22 @@ namespace EvilSpirit
 
 			Vector3[] vertices = mesh.vertices;
 			Vector3[] normals = mesh.normals;
-			int[] triangles = mesh.GetTriangles(0);
-			int n = triangles.Length / 3;
-			for (int i = 0; i < n; ++i)
+			for(int s = 0; s < mesh.subMeshCount; s++)
 			{
-				int ai = triangles[i * 3 + 0];
-				int bi = triangles[i * 3 + 1];
-				int ci = triangles[i * 3 + 2];
+				int[] triangles = mesh.GetTriangles(s);
+				int n = triangles.Length / 3;
+				for (int i = 0; i < n; ++i)
+				{
+					int ai = triangles[i * 3 + 0];
+					int bi = triangles[i * 3 + 1];
+					int ci = triangles[i * 3 + 2];
 
-				addTriangle(
-					addVertex(vertices[ai], normals[ai]),
-					addVertex(vertices[bi], normals[bi]),
-					addVertex(vertices[ci], normals[ci])
-				);
+					addTriangle(
+						addVertex(vertices[ai], normals[ai]),
+						addVertex(vertices[bi], normals[bi]),
+						addVertex(vertices[ci], normals[ci])
+					);
+				}
 			}
 			splitEdges();
 		}
