@@ -1,6 +1,6 @@
 {
   "name": "com.evilspirit.draftstroke",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "displayName": "Draft Stroke",
   "description": "Package for CAD style vector drawing.",
   "unity": "2020.1",
@@ -13,5 +13,8 @@
     "name": "Alexey Egorov",
     "email": "evilspirit@evilspirit.org",
     "url": "https://github.com/Evil-Spirit/DraftStroke"
+  },
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com/@H3-Space"
   }
 }
