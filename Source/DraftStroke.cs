@@ -132,6 +132,7 @@ namespace EvilSpirit
         void FillMesh(Lines li)
         {
             li.ClearMeshes();
+			bool needStitchPhase = li.style.dashes.Length > 1;
             var lines = li.lines;
             if (lines.Count == 0) return;
             int maxLines = 64000 / 4;
@@ -166,7 +167,7 @@ namespace EvilSpirit
                 {
                     var l = lines[i + lineStartIndex];
                     bool needZeroPhase = false;
-                    if (i < curLinesCount - 1)
+                    if (needStitchPhase && i < curLinesCount - 1)
                     {
                         var nl = lines[i + 1 + lineStartIndex];
                         if (l.b == nl.b)
