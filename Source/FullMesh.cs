@@ -79,7 +79,18 @@ namespace EvilSpirit
 					   ReferenceEquals(a, other.b) && ReferenceEquals(b, other.a);
 			}
 			
-			// value for perfect hash fuction generation (works for number of vertices < maxHashVertex)
+			public override bool Equals(object oth)
+			{
+				if(oth is VertexPair other)
+				{
+					// We don't bother about order (a, b) == (b, a)
+					return ReferenceEquals(a, other.a) && ReferenceEquals(b, other.b) ||
+						   ReferenceEquals(a, other.b) && ReferenceEquals(b, other.a);
+				}
+				return false;
+			}
+
+			// value for perfect hash function generation (works for number of vertices < maxHashVertex)
 			static int maxHashVertex = (int)Mathf.Sqrt(int.MaxValue) - 1;
 
 			public override int GetHashCode()
