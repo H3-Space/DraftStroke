@@ -6,18 +6,6 @@ using UnityEngine;
 
 namespace EvilSpirit
 {
-	public struct Pair<A, B>
-	{
-		public A a;
-		public B b;
-
-		public Pair(A a_, B b_)
-		{
-			a = a_;
-			b = b_;
-		}
-	}
-
 	public class MeshCheck
 	{
 
@@ -73,23 +61,53 @@ namespace EvilSpirit
 			}
 		};
 
+		struct VertexPair : IEquatable<VertexPair>
+		{
+			public Vertex a;
+			public Vertex b;
+
+			public VertexPair(Vertex a_, Vertex b_)
+			{
+				a = a_;
+				b = b_;
+			}
+
+			public bool Equals(VertexPair other)
+			{
+				// We don't bother about order (a, b) == (b, a)
+				return ReferenceEquals(a, other.a) && ReferenceEquals(b, other.b) ||
+					   ReferenceEquals(a, other.b) && ReferenceEquals(b, other.a);
+			}
+			
+			// value for perfect hash fuction generation (works for number of vertices < maxHashVertex)
+			static int maxHashVertex = (int)Mathf.Sqrt(int.MaxValue) - 1;
+
+			public override int GetHashCode()
+			{
+				// Since we don't bother about order, we have to generate the same hash
+				// new VertexPair(a, b).GetHashCode() == new VertexPair(b, a).GetHashCode()
+				if(a.index > b.index) return a.index + b.index * maxHashVertex;
+				return b.index + a.index * maxHashVertex;
+			}
+		}
+
 		class Triangle
 		{
 			public Vertex[] vertices = new Vertex[3];
 			public Edge[] edges = new Edge[3];
 
-			public Vector3 normal
+			public Vector3 normal;
+
+			public void CalcNormal()
 			{
-				get
-				{
-					return Vector3.Cross((vertices[0].pos - vertices[1].pos).normalized, (vertices[2].pos - vertices[1].pos).normalized).normalized;
-				}
+				// I know, too many normalized(), but lost of precision happen here without it.
+				normal = Vector3.Cross((vertices[0].pos - vertices[1].pos).normalized, (vertices[2].pos - vertices[1].pos).normalized).normalized;
 			}
 		};
 
 		Dictionary<Vector3, Vertex> vertices = new Dictionary<Vector3, Vertex>();
 		List<Triangle> triangles = new List<Triangle>();
-		Dictionary<Pair<Vertex, Vertex>, Edge> edges = new Dictionary<Pair<Vertex, Vertex>, Edge>();
+		Dictionary<VertexPair, Edge> edges = new Dictionary<VertexPair, Edge>();
 
 		public Mesh ToUnitySmoothMesh()
 		{
@@ -282,6 +300,7 @@ namespace EvilSpirit
 			result = new Vertex();
 			result.pos = v;
 			result.normal = n;
+			result.index = vertices.Count;
 			vertices.Add(v, result);
 			return result;
 		}
@@ -303,8 +322,7 @@ namespace EvilSpirit
 
 		void removeEdge(Vertex v0, Vertex v1)
 		{
-			edges.Remove(new Pair<Vertex, Vertex>(v0, v1));
-			edges.Remove(new Pair<Vertex, Vertex>(v1, v0));
+			edges.Remove(new VertexPair(v0, v1));
 		}
 
 		void removeEdge(Edge edge)
@@ -315,21 +333,23 @@ namespace EvilSpirit
 		Edge getEdge(Vertex v0, Vertex v1)
 		{
 			Edge result = null;
-			edges.TryGetValue(new Pair<Vertex, Vertex>(v0, v1), out result);
-			if (result != null) return result;
-			edges.TryGetValue(new Pair<Vertex, Vertex>(v1, v0), out result);
+			edges.TryGetValue(new VertexPair(v0, v1), out result);
 			return result;
 		}
 
 		Edge addEdge(Vertex v0, Vertex v1)
 		{
-			Edge result = getEdge(v0, v1);
-			if (result != null) return result;
+			var pair = new VertexPair(v0, v1);
 
-			result = new Edge();
+			if (edges.TryGetValue(pair, out var found))
+			{
+				return found;
+			}
+
+			var result = new Edge();
 			result.a = v0;
 			result.b = v1;
-			edges.Add(new Pair<Vertex, Vertex>(v0, v1), result);
+			edges.Add(pair, result);
 			return result;
 		}
 
@@ -355,6 +375,7 @@ namespace EvilSpirit
 				e.triangles.Add(t);
 				t.edges[i] = e;
 			}
+			t.CalcNormal();
 			triangles.Add(t);
 		}
 
@@ -516,13 +537,13 @@ namespace EvilSpirit
 			return IsEdgeSharp(edge, angle);
 		}
 
-		public List<Pair<Vector3, Vector3>> GenerateEdges(float angle)
+		public List<(Vector3, Vector3)> GenerateEdges(float angle)
 		{
-			List<Pair<Vector3, Vector3>> result = new List<Pair<Vector3, Vector3>>();
+			List<(Vector3, Vector3)> result = new List<(Vector3, Vector3)>();
 			foreach (var edge in edges.Values)
 			{
 				if (!IsEdgeSharp(edge, angle)) continue;
-				result.Add(new Pair<Vector3, Vector3>(edge.a.pos, edge.b.pos));
+				result.Add((edge.a.pos, edge.b.pos));
 			}
 			return result;
 		}
@@ -538,7 +559,7 @@ namespace EvilSpirit
 
 		public List<SilhouetteEdge> GenerateShihouetteEdges()
 		{
-			var result = new List<SilhouetteEdge>();
+			var result = new List<SilhouetteEdge>(edges.Count);
 			foreach (var edge in edges.Values)
 			{
 				if (edge.triangles.Count < 2)
@@ -552,7 +573,16 @@ namespace EvilSpirit
 				}
 				var ln = edge.triangles[0].normal;
 				if (ln == Vector3.zero) continue;
-				var rnt = edge.triangles.FirstOrDefault(t => t.normal != ln);
+				Triangle rnt = null;
+				for(int i = 0 ; i < edge.triangles.Count; i++)
+				{
+					var t = edge.triangles[i];
+					if(t.normal != ln)
+					{
+						rnt = t;
+						break;
+					}
+				}
 				if (rnt == null) continue;
 				var se = new SilhouetteEdge();
 				se.a = edge.a.pos;
