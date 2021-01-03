@@ -1,8 +1,7 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
-using UnityEditor;
+using UnityEngine;
 
 namespace EvilSpirit
 {
@@ -16,6 +15,15 @@ namespace EvilSpirit
 
 		static bool _initialized = false;
 		static float _dpiScale = 1f;
+
+        public static void ResetStaticState()
+        {
+            _initialized = false;
+            _dpiScale = 1f;
+            _feather = 0.7f;
+            DashAtlas.ResetStaticState();
+        }
+
 		public static float DpiScale
 		{
 			get
@@ -311,18 +319,6 @@ namespace EvilSpirit
 
                 foreach (var m in l.Value.objects)
                 {
-                    // meshrenderer.Material peroperty internally creates a defensive copy
-                    // sharedMaterial does not leak new objects
-                    // this changeg is bad if material is actually shared
-                    // Alexey: Actually I wish to inherit material here, not to use sharedMaterial
-                    // since I need to change current instance parameters. Ofc it can be done through
-                    // using material property block.
-
-                    // You are creating one unique material per Lines object, so both .material and
-                    // .sharedMaterial should return the same instance, but .material will check 
-                    // to see if anyother objects share this material. I still would rather use
-                    // .sharedMaterial and guarantees you're not leaking materials
-
                     var material = m.GetComponent<MeshRenderer>().sharedMaterial;
                     material.SetFloat("_Pixel", (float)1.0);
                     //material.SetVector("_CamDir", dir);

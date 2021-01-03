@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
 namespace EvilSpirit
 {
@@ -64,6 +63,10 @@ namespace EvilSpirit
 
 	public static class DashAtlas
 	{
+		public static void ResetStaticState()
+		{
+			cache = new Dictionary<DashPattern, Texture2D>();
+		}
 
 		static Dictionary<DashPattern, Texture2D> cache = new Dictionary<DashPattern, Texture2D>();
 

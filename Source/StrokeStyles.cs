@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
 namespace EvilSpirit
 {
-	[System.Serializable]
+	[Serializable]
 	public class StrokeStyle
 	{
-		public string name = System.Guid.NewGuid().ToString();
+		public string name = Guid.NewGuid().ToString();
 		public float width = 1f;
 		public object tag;
 

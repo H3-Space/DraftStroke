@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,7 +7,6 @@ namespace EvilSpirit
 {
 	public class MeshCheck
 	{
-
 		public float EPSILON = 1e-4f;
 
 		class Vertex
@@ -91,13 +89,13 @@ namespace EvilSpirit
 			}
 
 			// value for perfect hash function generation (works for number of vertices < maxHashVertex)
-			static int maxHashVertex = (int)Mathf.Sqrt(int.MaxValue) - 1;
+			static readonly int maxHashVertex = (int)Mathf.Sqrt(int.MaxValue) - 1;
 
 			public override int GetHashCode()
 			{
 				// Since we don't bother about order, we have to generate the same hash
 				// new VertexPair(a, b).GetHashCode() == new VertexPair(b, a).GetHashCode()
-				if(a.index > b.index) return a.index + b.index * maxHashVertex;
+				if (a.index > b.index) return a.index + b.index * maxHashVertex;
 				return b.index + a.index * maxHashVertex;
 			}
 		}
