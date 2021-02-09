@@ -73,7 +73,7 @@
 			fixed4 _Color;
 
 			#if defined(USE_WST_CROSSSECTION)
-				#include "Packages/com.thirdparty.worldspacetransitions/crossSection (HDRP)/StencilShaders/section_clipping_CS.hlsl"
+				#include "Packages/com.h3.clipbox/Shaders/StencilShaders/section_clipping_CS.hlsl"
 			#endif
 
 			v2f vert (appdata v) {
