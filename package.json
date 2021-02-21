@@ -1,6 +1,6 @@
 {
   "name": "com.evilspirit.draftstroke",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "displayName": "Draft Stroke",
   "description": "Package for CAD style vector drawing.",
   "unity": "2020.1",

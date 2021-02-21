@@ -1,3 +1,5 @@
 ﻿{
-	"name": "DraftStroke"
+	"name": "DraftStroke",
+	"autoReferenced": false,
+	"overrideReferences": true
 }
